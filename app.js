@@ -18,10 +18,11 @@ const ProductList = React.createClass({
     };
   },
   componentDidMount: function () {
-    this.updateState();
+    this.updateState("productSortAsc");
   },
-  updateState: function (compareFunc = "productSortAsc") {
+  updateState: function (func) {
     //sort data by compareFunc
+    const compareFunc = (func || this.state.compareFunc)
     const products = Data.sort((a, b) => {
       return ProductSortFunctionList[compareFunc](a, b);
     });

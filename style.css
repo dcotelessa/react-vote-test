@@ -9,6 +9,11 @@
   margin-bottom: 2em;
 }
 
+.ui.center.aligned.header.subheader,.ui.centered.header.subheader {
+    font-weight: normal;
+    border-bottom: 0;
+}
+
 i.icon {
   margin: 0;
 }
