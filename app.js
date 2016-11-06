@@ -1,47 +1,89 @@
 /* eslint-disable no-undef */
 
 // Components
-const ProductSortFunctionList =  {
+const ProductListDashboard =  React.createClass({
+  getInitialState: function () {
+    return {
+      products: [],
+      sortFunc: null
+    };
+  },
+  componentDidMount: function () {
+    this.updateState();
+  },
+  updateState: function (func) {
+    //state of sortFunc may not be set immediately or at all, so import any function temporarily
+    const sortFunc = func || this.state.sortFunc;
+    const products_sorted = sortFunc ? Data.sort((a, b) => {
+      return sortFunc(a, b);
+    }) : Data;
+    this.setState({ products: products_sorted});
+  },
+  handleProductSort: function(func) {
+    this.setState({ sortFunc: func});
+    this.updateState(func);
+  },
+  handleProducts: function() {
+    this.updateState();
+  },
+  render: function () {
+    return (
+      <div>
+        <ProductSortFunctionList
+          handleProductSort={this.handleProductSort}
+        />
+        <ProductList
+          products={this.state.products}
+          handleProducts={this.handleProducts}
+        />
+      </div>
+    );
+  },
+});
+
+// Components
+const ProductSortFunctionList =  React.createClass({
+  componentDidMount: function () {
+    //default
+    this.handleProductSort(this.productSortAsc);
+  },
+  handleProductSort: function (func) {
+    this.props.handleProductSort(func);
+  },
   productSortAsc: function (a, b) {
     return b.votes - a.votes;
   },
   productSortDesc: function (a, b) {
     return a.votes - b.votes;
   },
-};
+  render: function () {
+    return (
+      <div className="ui right floated content list sort">
+        <p>Sort
+          <a onClick={this.handleProductSort.bind(this, this.productSortAsc)}>
+            <i className='large caret up icon'></i>
+          </a>
+          <a onClick={this.handleProductSort.bind(this, this.productSortDesc)}>
+            <i className='large caret down icon'></i>
+          </a>
+        </p>
+      </div>
+    );
+  },
+});
 
 const ProductList = React.createClass({
-  getInitialState: function () {
-    return {
-      products: [],
-      compareFunc: null
-    };
-  },
-  componentDidMount: function () {
-    this.updateState("productSortAsc");
-  },
-  updateState: function (func) {
-    //sort data by compareFunc
-    const compareFunc = (func || this.state.compareFunc)
-    const products = Data.sort((a, b) => {
-      return ProductSortFunctionList[compareFunc](a, b);
-    });
-    this.setState({ products: products, compareFunc: compareFunc});
-  },
-  handleProductSort: function (funcStr) {
-    this.updateState(funcStr);
-  },
   handleProductVote: function (productId, inc) {
-    Data.forEach((el) => {
+    this.props.products.forEach((el) => {
       if (el.id === productId) {
         el.votes = el.votes + inc;
           return;
         }
       });
-    this.updateState();
+      this.props.handleProducts();
   },
   render: function () {
-    const products = this.state.products.map((product) => {
+    const products = this.props.products.map((product) => {
       return (
         <Product
         key={'product-' + product.id}
@@ -57,20 +99,8 @@ const ProductList = React.createClass({
       );
     });
     return (
-      <div>
-        <div className="ui right floated content list sort">
-          <p>Sort
-            <a onClick={this.handleProductSort.bind(this, "productSortAsc")}>
-              <i className='large caret up icon'></i>
-            </a>
-            <a onClick={this.handleProductSort.bind(this, "productSortDesc")}>
-              <i className='large caret down icon'></i>
-            </a>
-          </p>
-        </div>
-        <div className='ui items'>
-          {products}
-        </div>
+      <div className='ui items'>
+        {products}
       </div>
     );
   },
@@ -116,6 +146,6 @@ const Product = React.createClass({
 
 // Rendering
 ReactDOM.render(
-  <ProductList />,
+  <ProductListDashboard />,
   document.getElementById('content')
 );
